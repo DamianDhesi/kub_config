@@ -10,4 +10,4 @@ for node in $(kubectl get nodes -l 'node-role.kubernetes.io/control-plane' -o na
     kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data
 done
 
-echo "all nodes drained'
+echo "all nodes drained"

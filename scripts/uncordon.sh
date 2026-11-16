@@ -10,4 +10,4 @@ for node in $(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o n
     kubectl uncordon "$node"
 done
 
-echo "all nodes uncordoned'
+echo "all nodes uncordoned"
