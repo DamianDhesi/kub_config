@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - freshrss.yaml
+  # include all pod manifiests
+
+images:
+  - name: freshrss/freshrss
+    newTag: "1.30.4"
