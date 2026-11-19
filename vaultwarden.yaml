@@ -1,0 +1,110 @@
+# VaultWarden (1 replica, Port 30001, local-path storage)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vaultwarden
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vaultwarden-secrets
+  namespace: vaultwarden
+type: Opaque
+stringData:
+  ADMIN_TOKEN: '${ADMIN_TOKEN}'   # filled in from the env. Generate using openssl rand -base64 32
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vaultwarden-data
+  namespace: vaultwarden
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+  labels:
+    app: vaultwarden
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate       # avoids two pods touching the same volume
+  selector:
+    matchLabels:
+      app: vaultwarden
+  template:
+    metadata:
+      labels:
+        app: vaultwarden
+    spec:
+      nodeSelector:
+        workerType: control
+      containers:
+        - name: vaultwarden
+          image: vaultwarden/server:latest
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: DOMAIN
+              value: "https://vault.internal.ddhesi.com"
+            - name: SIGNUPS_ALLOWED
+              value: "true"    # set to "false" after you create your account
+            - name: INVITATIONS_ALLOWED
+              value: "true"
+            - name: WEBSOCKET_ENABLED
+              value: "true"
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vaultwarden-secrets
+                  key: ADMIN_TOKEN
+                  optional: true   # pod still starts (admin page disabled) if the secret is absent
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vaultwarden-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  type: NodePort
+  selector:
+    app: vaultwarden
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30001   # k8s default NodePort range is 30000-32767

@@ -37,7 +37,7 @@ metadata:
 spec:
   replicas: 1 
   strategy:
-    type: Recreate
+    type: Recreate  # avoids two pods touching the same volume
   selector:
     matchLabels:
       app: freshrss
@@ -103,4 +103,4 @@ spec:
     - name: http
       port: 80
       targetPort: http
-      nodePort: 30000   # K3s default NodePort range is 30000-32767
+      nodePort: 30000   # k8s default NodePort range is 30000-32767
