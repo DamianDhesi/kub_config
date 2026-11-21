@@ -8,3 +8,5 @@ resources:
 images:
   - name: freshrss/freshrss
     newTag: "1.30.4"
+  - name: vaultwarden/server
+    newTag: "1.37.5"
