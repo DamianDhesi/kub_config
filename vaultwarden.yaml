@@ -58,7 +58,7 @@ spec:
             - name: DOMAIN
               value: "https://vault.internal.ddhesi.com"
             - name: SIGNUPS_ALLOWED
-              value: "true"    # set to "false" after you create your account
+              value: "false"    # set to "false" after you create your account
             - name: INVITATIONS_ALLOWED
               value: "true"
             - name: WEBSOCKET_ENABLED
