@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - freshrss.yaml
-  # - vaultwarden.yaml
+  - vaultwarden.yaml
   # include all pod manifiests
 
 images:
